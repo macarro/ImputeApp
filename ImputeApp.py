@@ -1,53 +1,68 @@
 import tkinter as tk
 from tkinter import filedialog
 
-
-def load_file():
-    filename = filedialog.askopenfilename(
-        initialdir="/", title="Select file",
-        filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
-    print(filename)
+import pandas as pd
 
 
 def print_test():
     print("test")
 
 
-class ImputeApp(tk.Frame):
-    def __init__(self, master=None):
-        tk.Frame.__init__(self, master)
-        self.pack()
-        self.winfo_toplevel().title("ImputeApp")
-        self.winfo_toplevel().geometry("500x500")
-        self.winfo_toplevel().config(menu=self.make_menu())
+class ImputeApp:
+    def __init__(self):
+        self.root = tk.Tk()
+
+        self.root.title("ImputeApp")
+        self.root.geometry("500x500")
+        self.root.config(menu=self.make_menu())
+
+        self.data = None
+
+        self.data_msg = tk.StringVar(self.root)
+        self.data_msg.set("No file loaded.")
+
+        self.data_info = tk.StringVar(self.root)
+        self.data_info.set("")
+
         self.make_widgets()
 
-    def make_widgets(self):
-        quit_button = tk.Button(self, text='QUIT', fg='red', command=self.quit)
-        quit_button.pack({"side": "left"})
+        self.root.mainloop()
 
-        hi_there = tk.Button(self, text='Hello', command=print_test)
-        hi_there.pack({"side": "left"})
+    def make_widgets(self):
+
+        data_frame = tk.Frame(self.root, bg='red', height=50, width=300)
+        data_frame.grid(row=1, column=1, padx=10, pady=10)
+
+        data_label = tk.Label(data_frame, textvariable=self.data_msg)
+        data_label.grid(row=1, column=1, padx=5, pady=50)
+
+        info_frame = tk.Frame(self.root, bg='blue', height=50, width=300)
+        info_frame.grid(row=2, column=1, padx=10, pady=10)
+
+        info_label = tk.Label(info_frame, textvariable=self.data_info)
+        info_label.grid(row=1, column=1, padx=5, pady=50)
+
+        hi_there = tk.Button(self.root, text='Hello', command=print_test)
+        hi_there.grid(row=3, column=1)
 
     def make_menu(self):
-        menubar = tk.Menu(self.master)
+        menubar = tk.Menu(self.root)
 
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Import", command=load_file)
+        filemenu.add_command(label="Import", command=self.load_file)
         menubar.add_cascade(label="File", menu=filemenu)
 
         return menubar
 
-
-class Menu(tk.Frame):
-    def __init__(self, master=None):
-        menubar = tk.Menu(master)
-        datamenu = tk.Menu(self, tearoff=0)
-        datamenu.add_command(label="Salir", command=root.quit)
-        menubar.add_cascade(label="Datos", menu=datamenu)
+    def load_file(self):
+        filename = filedialog.askopenfilename(
+            initialdir="/", title="Select file",
+            filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
+        self.data = pd.read_table(filename)
+        self.data_msg.set('File: ' + filename)
+        self.data_info.set(str(self.data))
 
 
 if __name__ == "__main__":
-    root = tk.Tk()
-    app = ImputeApp(master=root)
-    app.mainloop()
+    app = ImputeApp()
+
