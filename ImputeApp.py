@@ -42,7 +42,7 @@ class ImputeApp:
             indata_selection_frame, text='File:')
         indata_selection_frame_l1.grid(row=1, column=1, sticky='W')
 
-        self.indata_selection_frame_fileloc_text = tk.Text(
+        self.indata_selection_frame_fileloc_text = tk.Entry(
             indata_selection_frame, width=20, height=1, state='disabled')
         self.indata_selection_frame_fileloc_text.grid(
             row=2, column=1, sticky='W')
