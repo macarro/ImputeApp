@@ -149,20 +149,33 @@ class ImputeApp:
         # ----------------
         self.imputation_frame = tk.Frame(self.root)
         self.imputation_frame.grid(
-            row=3, column=1, columnspan=2, padx=10, pady=10)
-        # Label
+            row=3, column=1, columnspan=2, padx=10, pady=10, sticky='W')
+        # Label:
         imputation_frame_l1 = tk.Label(
-            self.imputation_frame, text='Method:')
+            self.imputation_frame,
+            text='Imputation:', justify=tk.LEFT)
         imputation_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
-        # Dropdown
+        # Container:
+        self.imputation_cont = tk.Frame(
+            self.imputation_frame,
+            highlightbackground='black', highlightthickness=1)
+        self.imputation_cont.grid(
+            row=2, column=1, padx=2, pady=2)
+        # Label for method:
+        imputation_frame_l2 = tk.Label(
+            self.imputation_cont, text='Method:')
+        imputation_frame_l2.grid(
+            row=1, column=1, sticky='W', padx=2, pady=2)
+        # Dropdown:
         imputation_frame_dropdown = tk.OptionMenu(
-            self.imputation_frame, self.imputation_method, *self.imputation_methods)
+            self.imputation_cont, self.imputation_method,
+            *self.imputation_methods)
         imputation_frame_dropdown.grid(
             row=1, column=2, sticky='W', padx=2, pady=2)
-        # Button
+        # Button:
         imputation_frame_b1 = tk.Button(
-            self.imputation_frame, text='Apply',
+            self.imputation_cont, text='Apply',
             command=self.apply_imputation)
         imputation_frame_b1.grid(
             row=1, column=3, sticky='W', padx=2, pady=2)
@@ -174,7 +187,6 @@ class ImputeApp:
             self.indata_preview_frame.grid_remove()
         if self.imputation_frame is not None:
             self.imputation_frame.grid_remove()
-
 
     def show_output(self):
         # ------------------------
@@ -290,7 +302,6 @@ class ImputeApp:
             self.data_characteristics['num-columns'] * \
             self.data_characteristics['num-rows']
         self.data_characteristics_str.set(
-            'Input characteristics:\n'
             f'Variables: {self.data_characteristics["num-columns"]}\n'
             f'Subjects: {self.data_characteristics["num-rows"]}\n'
             f'Observations: {self.data_characteristics["num-observable"]}\n'
@@ -307,15 +318,31 @@ class ImputeApp:
             tk.Label(self.indata_preview, text=col_name,
                      borderwidth=1).grid(row=0, column=col_idx+1)
             for row_idx, row_name in enumerate(self.data.head(5).index):
-                tk.Label(
-                    self.indata_preview, text=self.data[col_name][row_name],
-                    borderwidth=1).grid(row=row_idx+1, column=col_idx+1)
+                if pd.isna(self.data[col_name][row_name]):
+                    tk.Label(
+                        self.indata_preview,
+                        text='NA',
+                        fg='red',
+                        borderwidth=1
+                    ).grid(row=row_idx + 1, column=col_idx + 1)
+                else:
+                    tk.Label(
+                        self.indata_preview,
+                        text=self.data[col_name][row_name],
+                        borderwidth=1
+                    ).grid(
+                        row=row_idx+1, column=col_idx+1)
 
     def apply_imputation(self):
         if self.imputation_method.get() == 'Listwise deletion':
             self.outdata = ina.delete_listwise(self.data)
         if self.imputation_method.get() == 'Drop variables':
             self.outdata = ina.delete_columns(self.data)
+        # Add log:
+        tk.Label(
+            self.imputation_cont,
+            text='Applied ' + self.imputation_method.get() + '.'
+        ).grid(row=2, column=1, columnspan=2, sticky='W')
         # Show output:
         self.show_output()
         # Update data_characteristics and data_characteristics_str:
@@ -329,7 +356,6 @@ class ImputeApp:
             self.outdata_characteristics['num-columns'] * \
             self.outdata_characteristics['num-rows']
         self.outdata_characteristics_str.set(
-            'Output characteristics:\n'
             f'Variables: {self.outdata_characteristics["num-columns"]}\n'
             f'Subjects: {self.outdata_characteristics["num-rows"]}\n'
             f'Observations: {self.outdata_characteristics["num-observable"]}\n'
@@ -339,10 +365,12 @@ class ImputeApp:
     # TODO del
     def load_test_data(self):
         self.indata_selection_frame_fileloc_entry.insert(0,
-            '/Users/miguelmacarro/Downloads/calles.csv')
+            '/Users/miguelmacarro/Downloads/0-sales.csv')
         self.indata_selection_frame_fileloc_entry.xview_moveto(1)
         # Load table and update info:
-        self.load_and_update_input('/Users/miguelmacarro/Downloads/calles.csv')
+        self.load_and_update_input(
+            '/Users/miguelmacarro/Downloads/0-sales.csv')
+
 
 if __name__ == "__main__":
     imputeApp = ImputeApp()
