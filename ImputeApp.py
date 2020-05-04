@@ -49,6 +49,10 @@ class ImputeApp:
         self.indata_selection_frame_fileloc_entry = None
         self.indata_preview = None
         self.outdata = None
+        self.indata_characteristics_frame = None
+        self.indata_preview_frame = None
+        self.imputation_frame = None
+        self.input_error_label = None
         # Make widgets:
         self.show_initial_view()
 
@@ -72,19 +76,19 @@ class ImputeApp:
         indata_selection_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
-        indata_selection_cont = tk.Frame(
+        self.indata_selection_cont = tk.Frame(
             indata_selection_frame,
             highlightbackground='black', highlightthickness=1)
-        indata_selection_cont.grid(
+        self.indata_selection_cont.grid(
             row=2, column=1, padx=2, pady=2)
         # Entry:
         self.indata_selection_frame_fileloc_entry = tk.Entry(
-            indata_selection_cont, width=20)
+            self.indata_selection_cont, width=20)
         self.indata_selection_frame_fileloc_entry.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Button:
         indata_selection_frame_b1 = tk.Button(
-            indata_selection_cont, text='Import',
+            self.indata_selection_cont, text='Import',
             command=self.load_input_from_entry)
         indata_selection_frame_b1.grid(
             row=2, column=1, sticky='W', padx=2, pady=2)
@@ -93,18 +97,19 @@ class ImputeApp:
         # --------------------------------
         # Input data characteristics frame
         # --------------------------------
-        indata_characteristics_frame = tk.Frame(
+        self.indata_characteristics_frame = tk.Frame(
             self.root, height=100, width=230)
-        indata_characteristics_frame.grid(row=1, column=2, padx=10, pady=10)
+        self.indata_characteristics_frame.grid(
+            row=1, column=2, padx=10, pady=10)
         # Label:
         indata_characteristics_frame_l1 = tk.Label(
-            indata_characteristics_frame,
+            self.indata_characteristics_frame,
             text='Input characteristics:', justify=tk.LEFT)
         indata_characteristics_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
         indata_characteristics_cont = tk.Frame(
-            indata_characteristics_frame,
+            self.indata_characteristics_frame,
             highlightbackground='black', highlightthickness=1)
         indata_characteristics_cont.grid(
             row=2, column=1, padx=2, pady=2)
@@ -117,19 +122,19 @@ class ImputeApp:
         # ------------------------
         # Input data preview frame
         # ------------------------
-        indata_preview_frame = tk.Frame(
+        self.indata_preview_frame = tk.Frame(
             self.root, height=100, width=250)
-        indata_preview_frame.grid(
+        self.indata_preview_frame.grid(
             row=2, column=1, columnspan=2, padx=10, pady=10)
         # Label:
         indata_preview_frame_l1 = tk.Label(
-            indata_preview_frame,
+            self.indata_preview_frame,
             text='Input data preview:', justify=tk.LEFT)
         indata_preview_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Scroll container:
         indata_preview_scroll_cont = HorizontallyScrollableFrame(
-            indata_preview_frame, width=400, height=130,
+            self.indata_preview_frame, width=400, height=130,
             highlightbackground='black',
             highlightthickness=1)
         indata_preview_scroll_cont.grid(
@@ -142,25 +147,34 @@ class ImputeApp:
         # ----------------
         # Imputation frame
         # ----------------
-        imputation_frame = tk.Frame(self.root)
-        imputation_frame.grid(
+        self.imputation_frame = tk.Frame(self.root)
+        self.imputation_frame.grid(
             row=3, column=1, columnspan=2, padx=10, pady=10)
         # Label
         imputation_frame_l1 = tk.Label(
-            imputation_frame, text='Method:')
+            self.imputation_frame, text='Method:')
         imputation_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Dropdown
         imputation_frame_dropdown = tk.OptionMenu(
-            imputation_frame, self.imputation_method, *self.imputation_methods)
+            self.imputation_frame, self.imputation_method, *self.imputation_methods)
         imputation_frame_dropdown.grid(
             row=1, column=2, sticky='W', padx=2, pady=2)
         # Button
         imputation_frame_b1 = tk.Button(
-            imputation_frame, text='Apply',
+            self.imputation_frame, text='Apply',
             command=self.apply_imputation)
         imputation_frame_b1.grid(
             row=1, column=3, sticky='W', padx=2, pady=2)
+
+    def hide_data_and_imputation(self):
+        if self.indata_characteristics_frame is not None:
+            self.indata_characteristics_frame.grid_remove()
+        if self.indata_preview_frame is not None:
+            self.indata_preview_frame.grid_remove()
+        if self.imputation_frame is not None:
+            self.imputation_frame.grid_remove()
+
 
     def show_output(self):
         # ------------------------
@@ -243,8 +257,26 @@ class ImputeApp:
         self.load_and_update_input(filename)
 
     def load_and_update_input(self, filename):
+        # Hide data, imputation and output and error labels:
+        self.hide_data_and_imputation()
+        if self.input_error_label is not None:
+            self.input_error_label.grid_remove()
         # Read csv:
-        self.data = pd.read_csv(filename)
+        try:
+            self.data = pd.read_csv(filename)
+        except FileNotFoundError:
+            self.input_error_label = tk.Label(
+                self.indata_selection_cont, text='File not found.')
+            self.input_error_label.grid(
+                row=3, column=1, sticky='W')
+            return
+        except Exception:
+            self.input_error_label = tk.Label(
+                self.indata_selection_cont,
+                text='File could not be read.')
+            self.input_error_label.grid(
+                row=3, column=1, sticky='W')
+            return
         # Show data and imputation:
         self.show_data_and_imputation()
         # Update data_characteristics and data_characteristics_str:
