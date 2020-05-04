@@ -165,6 +165,25 @@ class ImputeApp:
             command=self.apply_imputation)
         imputation_frame_b1.grid(
             row=1, column=3, sticky='W', padx=2, pady=2)
+        # ------------------------
+        # Output data export frame
+        # ------------------------
+        outdata_export_frame = tk.Frame(
+            self.root, height=100, width=230,
+            highlightbackground='black', highlightthickness=1)
+        outdata_export_frame.grid(
+            row=4, column=1, padx=10, pady=10)
+        # Label:
+        outdata_export_frame_l1 = tk.Label(
+            outdata_export_frame, text='Save output:')
+        outdata_export_frame_l1.grid(
+            row=1, column=1, sticky='W', padx=2, pady=2)
+        # Button:
+        outdata_export_frame_b1 = tk.Button(
+            outdata_export_frame, text='Save',
+            command=self.save_file)
+        outdata_export_frame_b1.grid(
+            row=2, column=1, sticky='W', padx=2, pady=2)
         # ---------------------------------
         # Output data characteristics frame
         # ---------------------------------
@@ -200,6 +219,14 @@ class ImputeApp:
         self.indata_selection_frame_fileloc_entry.xview_moveto(1)
         # Load table and update info:
         self.load_and_update_input(filename)
+
+    def save_file(self):
+        f = filedialog.asksaveasfile(mode='w', defaultextension=".csv")
+        if f is None:
+            return
+        else:
+            f.write(self.outdata.to_csv(index=False))
+            f.close()
 
     def load_input_from_entry(self):
         # Retrieve text written in entry:
