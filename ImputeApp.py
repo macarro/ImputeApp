@@ -5,29 +5,6 @@ import pandas as pd
 import imputena as ina
 
 
-class VerticallyScrollableFrame(tk.Frame):
-    # https://blog.tecladocode.com/tkinter-scrollable-frames/
-    def __init__(self, container, *args, **kwargs):
-        super().__init__(container, *args, **kwargs)
-        canvas = tk.Canvas(self)
-        scrollbar = tk.Scrollbar(self, orient="vertical", command=canvas.yview)
-        self.scrollable_frame = tk.Frame(canvas)
-
-        self.scrollable_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(
-                scrollregion=canvas.bbox("all")
-            )
-        )
-
-        canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
-
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-
 class HorizontallyScrollableFrame(tk.Frame):
     def __init__(self, container, width, height, *args, **kwargs):
         super().__init__(container, *args, **kwargs)
@@ -52,7 +29,8 @@ class ImputeApp:
         # Create and configure window:
         self.root = tk.Tk()
         self.root.title("ImputeApp")
-        self.root.geometry("500x500")
+        self.root.geometry("450x620")
+        self.root.minsize(450, 620)
         self.root.config(menu=self.make_menu())
         # Initialize class attributes:
         self.imputation_methods = [
@@ -72,7 +50,7 @@ class ImputeApp:
         self.indata_preview = None
         self.outdata = None
         # Make widgets:
-        self.make_widgets()
+        self.show_initial_view()
 
         #TODO del
         self.load_test_data()
@@ -80,13 +58,12 @@ class ImputeApp:
         # Mainloop:
         self.root.mainloop()
 
-    def make_widgets(self):
+    def show_initial_view(self):
         # --------------------------
         # Input data selection frame
         # --------------------------
         indata_selection_frame = tk.Frame(
-            self.root, height=100, width=230,
-            highlightbackground='black', highlightthickness=1)
+            self.root, height=100, width=230)
         indata_selection_frame.grid(
             row=1, column=1, padx=10, pady=10)
         # Label:
@@ -94,29 +71,48 @@ class ImputeApp:
             indata_selection_frame, text='Input file:')
         indata_selection_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
+        # Container
+        indata_selection_cont = tk.Frame(
+            indata_selection_frame,
+            highlightbackground='black', highlightthickness=1)
+        indata_selection_cont.grid(
+            row=2, column=1, padx=2, pady=2)
         # Entry:
         self.indata_selection_frame_fileloc_entry = tk.Entry(
-            indata_selection_frame, width=20)
+            indata_selection_cont, width=20)
         self.indata_selection_frame_fileloc_entry.grid(
-            row=2, column=1, sticky='W', padx=2, pady=2)
+            row=1, column=1, sticky='W', padx=2, pady=2)
         # Button:
-        self.indata_selection_frame_fileloc_b1 = tk.Button(
-            indata_selection_frame, text='Import',
+        indata_selection_frame_b1 = tk.Button(
+            indata_selection_cont, text='Import',
             command=self.load_input_from_entry)
-        self.indata_selection_frame_fileloc_b1.grid(
-            row=3, column=1, sticky='W', padx=2, pady=2)
+        indata_selection_frame_b1.grid(
+            row=2, column=1, sticky='W', padx=2, pady=2)
+
+    def show_data_and_imputation(self):
         # --------------------------------
         # Input data characteristics frame
         # --------------------------------
         indata_characteristics_frame = tk.Frame(
-            self.root, height=100, width=230, highlightbackground='black',
-            highlightthickness=1)
+            self.root, height=100, width=230)
         indata_characteristics_frame.grid(row=1, column=2, padx=10, pady=10)
         # Label:
         indata_characteristics_frame_l1 = tk.Label(
             indata_characteristics_frame,
-            textvariable=self.data_characteristics_str,  justify=tk.LEFT)
+            text='Input characteristics:', justify=tk.LEFT)
         indata_characteristics_frame_l1.grid(
+            row=1, column=1, sticky='W', padx=2, pady=2)
+        # Container
+        indata_characteristics_cont = tk.Frame(
+            indata_characteristics_frame,
+            highlightbackground='black', highlightthickness=1)
+        indata_characteristics_cont.grid(
+            row=2, column=1, padx=2, pady=2)
+        # Label with info:
+        indata_characteristics_frame_l2 = tk.Label(
+            indata_characteristics_cont,
+            textvariable=self.data_characteristics_str,  justify=tk.LEFT)
+        indata_characteristics_frame_l2.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # ------------------------
         # Input data preview frame
@@ -165,17 +161,18 @@ class ImputeApp:
             command=self.apply_imputation)
         imputation_frame_b1.grid(
             row=1, column=3, sticky='W', padx=2, pady=2)
+
+    def show_output(self):
         # ------------------------
         # Output data export frame
         # ------------------------
         outdata_export_frame = tk.Frame(
-            self.root, height=100, width=230,
-            highlightbackground='black', highlightthickness=1)
+            self.root, height=100, width=230)
         outdata_export_frame.grid(
             row=4, column=1, padx=10, pady=10)
         # Label:
         outdata_export_frame_l1 = tk.Label(
-            outdata_export_frame, text='Save output:')
+            outdata_export_frame, text='Save output file:')
         outdata_export_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Button:
@@ -188,14 +185,25 @@ class ImputeApp:
         # Output data characteristics frame
         # ---------------------------------
         outdata_characteristics_frame = tk.Frame(
-            self.root, height=100, width=230, highlightbackground='black',
-            highlightthickness=1)
+            self.root, height=100, width=230)
         outdata_characteristics_frame.grid(row=4, column=2, padx=10, pady=10)
         # Label:
         outdata_characteristics_frame_l1 = tk.Label(
             outdata_characteristics_frame,
-            textvariable=self.outdata_characteristics_str, justify=tk.LEFT)
+            text='Output characteristics:', justify=tk.LEFT)
         outdata_characteristics_frame_l1.grid(
+            row=1, column=1, sticky='W', padx=2, pady=2)
+        # Container
+        outdata_characteristics_cont = tk.Frame(
+            outdata_characteristics_frame,
+            highlightbackground='black', highlightthickness=1)
+        outdata_characteristics_cont.grid(
+            row=2, column=1, padx=2, pady=2)
+        # Label with info:
+        outdata_characteristics_frame_l2 = tk.Label(
+            outdata_characteristics_cont,
+            textvariable=self.outdata_characteristics_str, justify=tk.LEFT)
+        outdata_characteristics_frame_l2.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
 
     def make_menu(self):
@@ -237,6 +245,8 @@ class ImputeApp:
     def load_and_update_input(self, filename):
         # Read csv:
         self.data = pd.read_csv(filename)
+        # Show data and imputation:
+        self.show_data_and_imputation()
         # Update data_characteristics and data_characteristics_str:
         self.data_characteristics['num-columns'] = len(self.data.columns)
         self.data_characteristics['num-rows'] = len(self.data.index)
@@ -274,6 +284,8 @@ class ImputeApp:
             self.outdata = ina.delete_listwise(self.data)
         if self.imputation_method.get() == 'Drop variables':
             self.outdata = ina.delete_columns(self.data)
+        # Show output:
+        self.show_output()
         # Update data_characteristics and data_characteristics_str:
         self.outdata_characteristics['num-columns'] = len(self.outdata.columns)
         self.outdata_characteristics['num-rows'] = len(self.outdata.index)
