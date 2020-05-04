@@ -24,7 +24,7 @@ class ImputeApp:
         self.data_info = tk.StringVar(self.root)
         self.data_info.set("")
 
-        self.indata_selection_frame_fileloc_text = None
+        self.indata_selection_frame_fileloc_entry = None
 
         self.make_widgets()
 
@@ -34,21 +34,24 @@ class ImputeApp:
         # Input data selection frame
         # --------------------------
         indata_selection_frame = tk.Frame(
-            self.root, bg='red', height=50, width=230)
+            self.root, bg='red', height=100, width=230)
         indata_selection_frame.grid(row=1, column=1, padx=10, pady=10)
         indata_selection_frame.grid_propagate(0)
-
+        # Label
         indata_selection_frame_l1 = tk.Label(
             indata_selection_frame, text='File:')
         indata_selection_frame_l1.grid(row=1, column=1, sticky='W')
-
-        self.indata_selection_frame_fileloc_text = tk.Entry(
-            indata_selection_frame, width=20, height=1, state='disabled')
-        self.indata_selection_frame_fileloc_text.grid(
+        #Entry
+        self.indata_selection_frame_fileloc_entry = tk.Entry(
+            indata_selection_frame, width=20)
+        self.indata_selection_frame_fileloc_entry.grid(
             row=2, column=1, sticky='W')
-        self.indata_selection_frame_fileloc_text.configure(state='normal')
-        self.indata_selection_frame_fileloc_text.insert(1.0, 'No file loaded.')
-        self.indata_selection_frame_fileloc_text.configure(state='disabled')
+        #Button
+        self.indata_selection_frame_fileloc_b1 = tk.Button(
+            indata_selection_frame, text='Import',
+            command=self.load_input_from_entry)
+        self.indata_selection_frame_fileloc_b1.grid(
+            row=3, column=1, sticky='W')
 
 
         #data_label = tk.Label(
@@ -78,22 +81,23 @@ class ImputeApp:
         return menubar
 
     def load_file(self):
+        # Open file dialog:
         filename = filedialog.askopenfilename(
             initialdir="/", title="Select file",
             filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
+        # Update fileloc_entry:
+        self.indata_selection_frame_fileloc_entry.delete(0, tk.END)
+        self.indata_selection_frame_fileloc_entry.insert(0, filename)
+        self.indata_selection_frame_fileloc_entry.xview_moveto(1)
+        # Load table and update info:
         self.data = pd.read_table(filename)
-        #self.data_msg.set('File: ' + filename)
+        self.data_info.set(str(self.data))
 
-        self.indata_selection_frame_fileloc_text.configure(state='normal')
-        self.indata_selection_frame_fileloc_text.delete('1.0', tk.END)
-        self.indata_selection_frame_fileloc_text.insert(1.0, filename)
-        self.indata_selection_frame_fileloc_text.tag_add(
-            "all", 1.0, tk.END)
-        self.indata_selection_frame_fileloc_text.tag_config(
-            "all", background="yellow", foreground="blue", wrap=tk.CHAR)
-
-        #self.indata_selection_frame_fileloc_text.configure(state='disabled')
-
+    def load_input_from_entry(self):
+        # Retrieve text written in entry:
+        filename = self.indata_selection_frame_fileloc_entry.get()
+        # Load table and update info:
+        self.data = pd.read_table(filename)
         self.data_info.set(str(self.data))
 
 
