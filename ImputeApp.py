@@ -29,6 +29,7 @@ class ImputeApp:
         # Configure language
         self.language = 'ES'  # TODO change
         self.msgs_ES = {
+            'Language': 'Idioma',
             'English': 'Inglés',
             'Spanish': 'Español',
             'Input file:': 'Archivo de entrada:',
@@ -47,7 +48,7 @@ class ImputeApp:
             'Applied': 'Aplicado',
             'Save output file:': 'Guardar salida',
             'Save': 'Guardar',
-            'Output characteristics:': 'Característias de salida:',
+            'Output characteristics:': 'Características de salida:',
             'File': 'Archivo',
             'Select file': 'Seleccionar archivo',
             'File not found.': 'Archivo no encontrado.',
@@ -63,23 +64,22 @@ class ImputeApp:
             'Listwise deletion',
             'Drop variables'
         ]
-        self.imputation_methods_loc = {
-            self.msg(v): v for v in self.imputation_methods}
         # Create and configure window:
         self.root = tk.Tk()
         self.root.title("ImputeApp")
         self.root.geometry("450x620")
         self.root.minsize(450, 620)
-        self.root.config(menu=self.make_menu())
+        self.make_menu()
         # Initialize class attributes:
-        self.imputation_method_loc = tk.StringVar(self.root)
-        self.imputation_method_loc.set(self.msg(self.imputation_methods[0]))
+        self.initialize_inputation_methods()
         self.data_characteristics_str = tk.StringVar(self.root)
         self.data_characteristics_str.set('')
         self.outdata_characteristics_str = tk.StringVar(self.root)
         self.outdata_characteristics_str.set('')
         self.data = None
+        self.input_fileloc = ''
         # Initialize widgets:
+        self.indata_selection_frame = None
         self.indata_selection_frame_fileloc_entry = None
         self.indata_preview = None
         self.outdata = None
@@ -90,6 +90,8 @@ class ImputeApp:
         self.input_error_label = None
         self.imputation_cont = None
         self.imputation_log = None
+        self.outdata_export_frame = None
+        self.outdata_characteristics_frame = None
         # Make widgets:
         self.show_initial_view()
 
@@ -99,22 +101,24 @@ class ImputeApp:
         # Mainloop:
         self.root.mainloop()
 
+    # Initial view ------------------------------------------------------------
+
     def show_initial_view(self):
         # --------------------------
         # Input data selection frame
         # --------------------------
-        indata_selection_frame = tk.Frame(
+        self.indata_selection_frame = tk.Frame(
             self.root, height=100, width=230)
-        indata_selection_frame.grid(
+        self.indata_selection_frame.grid(
             row=1, column=1, padx=10, pady=10)
         # Label:
         indata_selection_frame_l1 = tk.Label(
-            indata_selection_frame, text=self.msg('Input file:'))
+            self.indata_selection_frame, text=self.msg('Input file:'))
         indata_selection_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
         self.indata_selection_cont = tk.Frame(
-            indata_selection_frame,
+            self.indata_selection_frame,
             highlightbackground='black', highlightthickness=1)
         self.indata_selection_cont.grid(
             row=2, column=1, padx=2, pady=2)
@@ -129,6 +133,14 @@ class ImputeApp:
             command=self.load_input_from_entry)
         indata_selection_frame_b1.grid(
             row=2, column=1, sticky='W', padx=2, pady=2)
+
+    def hide_initial_view(self):
+        shown = self.indata_selection_frame is not None
+        if shown:
+            self.indata_selection_frame.grid_remove
+        return shown
+
+    # Data and imputation view ------------------------------------------------
 
     def show_data_and_imputation(self):
         # --------------------------------
@@ -218,47 +230,52 @@ class ImputeApp:
             row=1, column=3, sticky='W', padx=2, pady=2)
 
     def hide_data_and_imputation(self):
-        if self.indata_characteristics_frame is not None:
+        shown = self.indata_characteristics_frame is not None and \
+                self.indata_preview_frame is not None and \
+                self.imputation_frame is not None
+        if shown:
             self.indata_characteristics_frame.grid_remove()
-        if self.indata_preview_frame is not None:
             self.indata_preview_frame.grid_remove()
-        if self.imputation_frame is not None:
             self.imputation_frame.grid_remove()
+        return shown
+
+    # Output view -------------------------------------------------------------
 
     def show_output(self):
         # ------------------------
         # Output data export frame
         # ------------------------
-        outdata_export_frame = tk.Frame(
+        self.outdata_export_frame = tk.Frame(
             self.root, height=100, width=230)
-        outdata_export_frame.grid(
+        self.outdata_export_frame.grid(
             row=4, column=1, padx=10, pady=10)
         # Label:
         outdata_export_frame_l1 = tk.Label(
-            outdata_export_frame, text=self.msg('Save output file:'))
+            self.outdata_export_frame, text=self.msg('Save output file:'))
         outdata_export_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Button:
         outdata_export_frame_b1 = tk.Button(
-            outdata_export_frame, text=self.msg('Save'),
+            self.outdata_export_frame, text=self.msg('Save'),
             command=self.save_file)
         outdata_export_frame_b1.grid(
             row=2, column=1, sticky='W', padx=2, pady=2)
         # ---------------------------------
         # Output data characteristics frame
         # ---------------------------------
-        outdata_characteristics_frame = tk.Frame(
+        self.outdata_characteristics_frame = tk.Frame(
             self.root, height=100, width=230)
-        outdata_characteristics_frame.grid(row=4, column=2, padx=10, pady=10)
+        self.outdata_characteristics_frame.grid(row=4, column=2, padx=10,
+                                              pady=10)
         # Label:
         outdata_characteristics_frame_l1 = tk.Label(
-            outdata_characteristics_frame,
+            self.outdata_characteristics_frame,
             text=self.msg('Output characteristics:'), justify=tk.LEFT)
         outdata_characteristics_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
         outdata_characteristics_cont = tk.Frame(
-            outdata_characteristics_frame,
+            self.outdata_characteristics_frame,
             highlightbackground='black', highlightthickness=1)
         outdata_characteristics_cont.grid(
             row=2, column=1, padx=2, pady=2)
@@ -269,15 +286,70 @@ class ImputeApp:
         outdata_characteristics_frame_l2.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
 
+    def hide_output(self):
+        shown = self.outdata_export_frame is not None and \
+                self.outdata_characteristics_frame is not None
+        if shown:
+            self.outdata_export_frame.grid_remove()
+            self.outdata_characteristics_frame.grid_remove()
+        return shown
+
+    # Menu --------------------------------------------------------------------
+
     def make_menu(self):
         # Create menubar:
         menubar = tk.Menu(self.root)
-        # Create filemenu
+        # Create filemenu:
         filemenu = tk.Menu(menubar, tearoff=0)
         filemenu.add_command(label=self.msg('Import'), command=self.load_file)
         menubar.add_cascade(label=self.msg('File'), menu=filemenu)
-        # Return menubar:
-        return menubar
+        # Create language menu:
+        languagemenu = tk.Menu(menubar, tearoff=0)
+        languagemenu.add_command(
+            label=self.msg('English'),
+            command=lambda: self.change_language('EN'))
+        languagemenu.add_command(
+            label=self.msg('Spanish'),
+            command=lambda: self.change_language('ES'))
+        menubar.add_cascade(label=self.msg('Language'), menu=languagemenu)
+        # Add menubar to root:
+        self.root.config(menu=menubar)
+
+    # Controller functions ----------------------------------------------------
+
+    def msg(self, code):
+        res = code
+        if self.language in self.languages and \
+                code in self.languages[self.language]:
+            res = self.languages[self.language][code]
+        return res
+
+    def change_language(self, languagecode):
+        # Change language:
+        self.language = languagecode
+        # Redraw interface:
+        self.hide_initial_view()
+        self.show_initial_view()
+        self.indata_selection_frame_fileloc_entry.insert(0, self.input_fileloc)
+        self.indata_selection_frame_fileloc_entry.xview_moveto(1)
+        if self.hide_data_and_imputation():
+            self.show_data_and_imputation()
+            # Reload input to draw preview, characteristics:
+            self.load_and_update_input(self.input_fileloc)
+            # Reload imputation methods:
+            self.initialize_inputation_methods()
+        if self.hide_output():
+            self.show_output()
+            # Update outdata_characteristics_str:
+            self.outdata_characteristics_str.set(
+                self.create_characteristics_string(self.outdata))
+        self.make_menu()
+
+    def initialize_inputation_methods(self):
+        self.imputation_methods_loc = {
+            self.msg(v): v for v in self.imputation_methods}
+        self.imputation_method_loc = tk.StringVar(self.root)
+        self.imputation_method_loc.set(self.msg(self.imputation_methods[0]))
 
     def load_file(self):
         # Open file dialog:
@@ -288,20 +360,14 @@ class ImputeApp:
         self.indata_selection_frame_fileloc_entry.delete(0, tk.END)
         self.indata_selection_frame_fileloc_entry.insert(0, filename)
         self.indata_selection_frame_fileloc_entry.xview_moveto(1)
+        self.input_fileloc = filename
         # Load table and update info:
         self.load_and_update_input(filename)
-
-    def save_file(self):
-        f = filedialog.asksaveasfile(mode='w', defaultextension=".csv")
-        if f is None:
-            return
-        else:
-            f.write(self.outdata.to_csv(index=False))
-            f.close()
 
     def load_input_from_entry(self):
         # Retrieve text written in entry:
         filename = self.indata_selection_frame_fileloc_entry.get()
+        self.input_fileloc = filename
         # Load table and update info:
         self.load_and_update_input(filename)
 
@@ -373,7 +439,7 @@ class ImputeApp:
         self.imputation_log.grid(row=2, column=1, columnspan=2, sticky='W')
         # Show output:
         self.show_output()
-        # Update data_characteristics_str:
+        # Update outdata_characteristics_str:
         self.outdata_characteristics_str.set(
             self.create_characteristics_string(self.outdata))
 
@@ -399,19 +465,20 @@ class ImputeApp:
             self.msg('Percentage missing') + ': ' + str(missing_percentage)
         return res
 
-    def msg(self, code):
-        res = code
-        if self.language in self.languages and \
-                code in self.languages[self.language]:
-            res = self.languages[self.language][code]
-        return res
-
+    def save_file(self):
+        f = filedialog.asksaveasfile(mode='w', defaultextension=".csv")
+        if f is None:
+            return
+        else:
+            f.write(self.outdata.to_csv(index=False))
+            f.close()
 
     # TODO del
     def load_test_data(self):
         self.indata_selection_frame_fileloc_entry.insert(
             0, '/Users/miguelmacarro/Downloads/0-sales.csv')
         self.indata_selection_frame_fileloc_entry.xview_moveto(1)
+        self.input_fileloc = '/Users/miguelmacarro/Downloads/0-sales.csv'
         # Load table and update info:
         self.load_and_update_input(
             '/Users/miguelmacarro/Downloads/0-sales.csv')
