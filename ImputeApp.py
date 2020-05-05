@@ -26,6 +26,45 @@ class HorizontallyScrollableFrame(tk.Frame):
 
 class ImputeApp:
     def __init__(self):
+        # Configure language
+        self.language = 'ES'  # TODO change
+        self.msgs_ES = {
+            'English': 'Inglés',
+            'Spanish': 'Español',
+            'Input file:': 'Archivo de entrada:',
+            'Import': 'Importar',
+            'Input characteristics:': 'Características de entrada:',
+            'Variables': 'Variables',
+            'Subjects': 'Sujetos',
+            'Observations': 'Observaciones',
+            'Missing values': 'Ausencias',
+            'Total values': 'Valores totales',
+            'Percentage missing': 'Proporción de ausencias',
+            'Input data preview:': 'Vista previa de entrada:',
+            'Imputation:': 'Imputación:',
+            'Method:': 'Método:',
+            'Apply': 'Aplicar',
+            'Applied': 'Aplicado',
+            'Save output file:': 'Guardar salida',
+            'Save': 'Guardar',
+            'Output characteristics:': 'Característias de salida:',
+            'File': 'Archivo',
+            'Select file': 'Seleccionar archivo',
+            'File not found.': 'Archivo no encontrado.',
+            'File could not be read.': 'No se puede interpretar.',
+            'Index': 'Índice',
+            'Listwise deletion': 'Análisis de casos completos',
+            'Drop variables': 'Eliminar variables'
+        }
+        self.languages = {
+            'ES': self.msgs_ES
+        }
+        self.imputation_methods = [
+            'Listwise deletion',
+            'Drop variables'
+        ]
+        self.imputation_methods_loc = {
+            self.msg(v): v for v in self.imputation_methods}
         # Create and configure window:
         self.root = tk.Tk()
         self.root.title("ImputeApp")
@@ -33,16 +72,10 @@ class ImputeApp:
         self.root.minsize(450, 620)
         self.root.config(menu=self.make_menu())
         # Initialize class attributes:
-        self.imputation_methods = [
-            'Listwise deletion',
-            'Drop variables'
-        ]
-        self.imputation_method = tk.StringVar(self.root)
-        self.imputation_method.set(self.imputation_methods[0])
-        self.data_characteristics = {}
+        self.imputation_method_loc = tk.StringVar(self.root)
+        self.imputation_method_loc.set(self.msg(self.imputation_methods[0]))
         self.data_characteristics_str = tk.StringVar(self.root)
         self.data_characteristics_str.set('')
-        self.outdata_characteristics = {}
         self.outdata_characteristics_str = tk.StringVar(self.root)
         self.outdata_characteristics_str.set('')
         self.data = None
@@ -76,7 +109,7 @@ class ImputeApp:
             row=1, column=1, padx=10, pady=10)
         # Label:
         indata_selection_frame_l1 = tk.Label(
-            indata_selection_frame, text='Input file:')
+            indata_selection_frame, text=self.msg('Input file:'))
         indata_selection_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
@@ -92,7 +125,7 @@ class ImputeApp:
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Button:
         indata_selection_frame_b1 = tk.Button(
-            self.indata_selection_cont, text='Import',
+            self.indata_selection_cont, text=self.msg('Import'),
             command=self.load_input_from_entry)
         indata_selection_frame_b1.grid(
             row=2, column=1, sticky='W', padx=2, pady=2)
@@ -108,7 +141,7 @@ class ImputeApp:
         # Label:
         indata_characteristics_frame_l1 = tk.Label(
             self.indata_characteristics_frame,
-            text='Input characteristics:', justify=tk.LEFT)
+            text=self.msg('Input characteristics:'), justify=tk.LEFT)
         indata_characteristics_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
@@ -133,7 +166,7 @@ class ImputeApp:
         # Label:
         indata_preview_frame_l1 = tk.Label(
             self.indata_preview_frame,
-            text='Input data preview:', justify=tk.LEFT)
+            text=self.msg('Input data preview:'), justify=tk.LEFT)
         indata_preview_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Scroll container:
@@ -157,7 +190,7 @@ class ImputeApp:
         # Label:
         imputation_frame_l1 = tk.Label(
             self.imputation_frame,
-            text='Imputation:', justify=tk.LEFT)
+            text=self.msg('Imputation:'), justify=tk.LEFT)
         imputation_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container:
@@ -168,18 +201,18 @@ class ImputeApp:
             row=2, column=1, padx=2, pady=2)
         # Label for method:
         imputation_frame_l2 = tk.Label(
-            self.imputation_cont, text='Method:')
+            self.imputation_cont, text=self.msg('Method:'))
         imputation_frame_l2.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Dropdown:
         imputation_frame_dropdown = tk.OptionMenu(
-            self.imputation_cont, self.imputation_method,
-            *self.imputation_methods)
+            self.imputation_cont, self.imputation_method_loc,
+            *self.imputation_methods_loc.keys())
         imputation_frame_dropdown.grid(
             row=1, column=2, sticky='W', padx=2, pady=2)
         # Button:
         imputation_frame_b1 = tk.Button(
-            self.imputation_cont, text='Apply',
+            self.imputation_cont, text=self.msg('Apply'),
             command=self.apply_imputation)
         imputation_frame_b1.grid(
             row=1, column=3, sticky='W', padx=2, pady=2)
@@ -202,12 +235,12 @@ class ImputeApp:
             row=4, column=1, padx=10, pady=10)
         # Label:
         outdata_export_frame_l1 = tk.Label(
-            outdata_export_frame, text='Save output file:')
+            outdata_export_frame, text=self.msg('Save output file:'))
         outdata_export_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Button:
         outdata_export_frame_b1 = tk.Button(
-            outdata_export_frame, text='Save',
+            outdata_export_frame, text=self.msg('Save'),
             command=self.save_file)
         outdata_export_frame_b1.grid(
             row=2, column=1, sticky='W', padx=2, pady=2)
@@ -220,7 +253,7 @@ class ImputeApp:
         # Label:
         outdata_characteristics_frame_l1 = tk.Label(
             outdata_characteristics_frame,
-            text='Output characteristics:', justify=tk.LEFT)
+            text=self.msg('Output characteristics:'), justify=tk.LEFT)
         outdata_characteristics_frame_l1.grid(
             row=1, column=1, sticky='W', padx=2, pady=2)
         # Container
@@ -241,15 +274,15 @@ class ImputeApp:
         menubar = tk.Menu(self.root)
         # Create filemenu
         filemenu = tk.Menu(menubar, tearoff=0)
-        filemenu.add_command(label="Import", command=self.load_file)
-        menubar.add_cascade(label="File", menu=filemenu)
+        filemenu.add_command(label=self.msg('Import'), command=self.load_file)
+        menubar.add_cascade(label=self.msg('File'), menu=filemenu)
         # Return menubar:
         return menubar
 
     def load_file(self):
         # Open file dialog:
         filename = filedialog.askopenfilename(
-            initialdir="/", title="Select file",
+            initialdir="/", title=self.msg('Select file'),
             filetypes=(("csv files", "*.csv"), ("all files", "*.*")))
         # Update fileloc_entry:
         self.indata_selection_frame_fileloc_entry.delete(0, tk.END)
@@ -282,37 +315,24 @@ class ImputeApp:
             self.data = pd.read_csv(filename)
         except FileNotFoundError:
             self.input_error_label = tk.Label(
-                self.indata_selection_cont, text='File not found.')
+                self.indata_selection_cont, text=self.msg('File not found.'))
             self.input_error_label.grid(
                 row=3, column=1, sticky='W')
             return
         except Exception:
             self.input_error_label = tk.Label(
                 self.indata_selection_cont,
-                text='File could not be read.')
+                text=self.msg('File could not be read.'))
             self.input_error_label.grid(
                 row=3, column=1, sticky='W')
             return
         # Show data and imputation:
         self.show_data_and_imputation()
-        # Update data_characteristics and data_characteristics_str:
-        self.data_characteristics['num-columns'] = len(self.data.columns)
-        self.data_characteristics['num-rows'] = len(self.data.index)
-        self.data_characteristics['num-observable'] = \
-            self.data.notna().sum().sum()
-        self.data_characteristics['num-missing'] = \
-            self.data.isna().sum().sum()
-        self.data_characteristics['num-total'] = \
-            self.data_characteristics['num-columns'] * \
-            self.data_characteristics['num-rows']
+        # Update data_characteristics_str:
         self.data_characteristics_str.set(
-            f'Variables: {self.data_characteristics["num-columns"]}\n'
-            f'Subjects: {self.data_characteristics["num-rows"]}\n'
-            f'Observations: {self.data_characteristics["num-observable"]}\n'
-            f'Missing values: {self.data_characteristics["num-missing"]}\n'
-            f'Total values: {self.data_characteristics["num-total"]}\n')
+            self.create_characteristics_string(self.data))
         # Populate input preview:
-        tk.Label(self.indata_preview, text='Index',
+        tk.Label(self.indata_preview, text=self.msg('Index'),
                  borderwidth=1).grid(row=0, column=0)
         for row_idx, row_name in enumerate(self.data.head(5).index):
             tk.Label(
@@ -338,36 +358,54 @@ class ImputeApp:
                         row=row_idx+1, column=col_idx+1)
 
     def apply_imputation(self):
-        if self.imputation_method.get() == 'Listwise deletion':
+        if self.imputation_method_loc.get() == self.msg('Listwise deletion'):
             self.outdata = ina.delete_listwise(self.data)
-        if self.imputation_method.get() == 'Drop variables':
+        if self.imputation_method_loc.get() == self.msg('Drop variables'):
             self.outdata = ina.delete_columns(self.data)
         # Add log:
         if self.imputation_log is not None:
             self.imputation_log.grid_remove()
         self.imputation_log = tk.Label(
             self.imputation_cont,
-            text='Applied ' + self.imputation_method.get() + '.'
+            text=self.msg('Applied') + ' ' + self.imputation_method_loc.get()
+                 + '.'
         )
         self.imputation_log.grid(row=2, column=1, columnspan=2, sticky='W')
         # Show output:
         self.show_output()
-        # Update data_characteristics and data_characteristics_str:
-        self.outdata_characteristics['num-columns'] = len(self.outdata.columns)
-        self.outdata_characteristics['num-rows'] = len(self.outdata.index)
-        self.outdata_characteristics['num-observable'] = \
-            self.outdata.notna().sum().sum()
-        self.outdata_characteristics['num-missing'] = \
-            self.outdata.isna().sum().sum()
-        self.outdata_characteristics['num-total'] = \
-            self.outdata_characteristics['num-columns'] * \
-            self.outdata_characteristics['num-rows']
+        # Update data_characteristics_str:
         self.outdata_characteristics_str.set(
-            f'Variables: {self.outdata_characteristics["num-columns"]}\n'
-            f'Subjects: {self.outdata_characteristics["num-rows"]}\n'
-            f'Observations: {self.outdata_characteristics["num-observable"]}\n'
-            f'Missing values: {self.outdata_characteristics["num-missing"]}\n'
-            f'Total values: {self.outdata_characteristics["num-total"]}\n')
+            self.create_characteristics_string(self.outdata))
+
+    def create_characteristics_string(self, data):
+        # Compute values:
+        num_columns = len(data.columns)
+        num_rows = len(data.index)
+        num_observable = data.notna().sum().sum()
+        num_missing = data.isna().sum().sum()
+        num_total = num_columns * num_rows
+        if num_total == 0:
+            missing_percentage = 'NA'
+        else:
+            missing_percentage = str(
+                int((num_missing / num_total) * 100)) + '%'
+        # Format and return string:
+        res = \
+            self.msg('Variables') + ': ' + str(num_columns) + '\n' + \
+            self.msg('Subjects') + ': ' + str(num_rows) + '\n' + \
+            self.msg('Observations') + ': ' + str(num_observable) + '\n' + \
+            self.msg('Missing values') + ': ' + str(num_missing) + '\n' + \
+            self.msg('Total values') + ': ' + str(num_total) + '\n' + \
+            self.msg('Percentage missing') + ': ' + str(missing_percentage)
+        return res
+
+    def msg(self, code):
+        res = code
+        if self.language in self.languages and \
+                code in self.languages[self.language]:
+            res = self.languages[self.language][code]
+        return res
+
 
     # TODO del
     def load_test_data(self):
