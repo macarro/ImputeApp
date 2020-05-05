@@ -53,6 +53,8 @@ class ImputeApp:
         self.indata_preview_frame = None
         self.imputation_frame = None
         self.input_error_label = None
+        self.imputation_cont = None
+        self.imputation_log = None
         # Make widgets:
         self.show_initial_view()
 
@@ -339,10 +341,13 @@ class ImputeApp:
         if self.imputation_method.get() == 'Drop variables':
             self.outdata = ina.delete_columns(self.data)
         # Add log:
-        tk.Label(
+        if self.imputation_log is not None:
+            self.imputation_log.grid_remove()
+        self.imputation_log = tk.Label(
             self.imputation_cont,
             text='Applied ' + self.imputation_method.get() + '.'
-        ).grid(row=2, column=1, columnspan=2, sticky='W')
+        )
+        self.imputation_log.grid(row=2, column=1, columnspan=2, sticky='W')
         # Show output:
         self.show_output()
         # Update data_characteristics and data_characteristics_str:
