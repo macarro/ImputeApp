@@ -38,5 +38,8 @@ exe = EXE(pyz,
           console=False )
 app = BUNDLE(exe,
              name='ImputeApp.app',
-             icon=None,
-             bundle_identifier=None)
+             icon='./resources/ImputeApp.icns',
+             bundle_identifier='com.imputeapp',
+             info_plist={
+                'CFBundleShortVersionString': '0.1.0'
+             })
