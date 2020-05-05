@@ -1,10 +1,15 @@
 # -*- mode: python ; coding: utf-8 -*-
 
+import os
+
+spec_root = os.path.abspath(SPECPATH)
+
+
 block_cipher = None
 
 
 a = Analysis(['ImputeApp.py'],
-             pathex=['/Users/miguelmacarro/Documents/Universidad/TFG/ImputeApp'],
+             pathex=[spec_root],
              binaries=[('/System/Library/Frameworks/Tk.framework/Tk', 'tk'), ('/System/Library/Frameworks/Tcl.framework/Tcl', 'tcl')],
              datas=[],
              hiddenimports=['pkg_resources.py2_warn', 'sklearn.utils._cython_blas'],
