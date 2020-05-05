@@ -39,16 +39,18 @@ class ImputeApp:
         ]
         self.imputation_method = tk.StringVar(self.root)
         self.imputation_method.set(self.imputation_methods[0])
-        self.data = None
         self.data_characteristics = {}
         self.data_characteristics_str = tk.StringVar(self.root)
         self.data_characteristics_str.set('')
         self.outdata_characteristics = {}
         self.outdata_characteristics_str = tk.StringVar(self.root)
         self.outdata_characteristics_str.set('')
+        self.data = None
+        # Initialize widgets:
         self.indata_selection_frame_fileloc_entry = None
         self.indata_preview = None
         self.outdata = None
+        self.indata_selection_cont = None
         self.indata_characteristics_frame = None
         self.indata_preview_frame = None
         self.imputation_frame = None
@@ -369,8 +371,8 @@ class ImputeApp:
 
     # TODO del
     def load_test_data(self):
-        self.indata_selection_frame_fileloc_entry.insert(0,
-            '/Users/miguelmacarro/Downloads/0-sales.csv')
+        self.indata_selection_frame_fileloc_entry.insert(
+            0, '/Users/miguelmacarro/Downloads/0-sales.csv')
         self.indata_selection_frame_fileloc_entry.xview_moveto(1)
         # Load table and update info:
         self.load_and_update_input(
@@ -379,6 +381,3 @@ class ImputeApp:
 
 if __name__ == "__main__":
     imputeApp = ImputeApp()
-
-
-
