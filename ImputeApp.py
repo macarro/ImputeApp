@@ -56,7 +56,23 @@ class ImputeApp:
             'Index': 'Índice',
             'listwise deletion': 'Análisis de casos completos',
             'variable deletion': 'Eliminar variables',
-            'random sample imputation': 'Imputación por muestra aleatoria'
+            'random sample imputation': 'Imputación por muestra aleatoria',
+            'most-frequent substitution': 'Sustitución por valor más '
+                                          'frecuente',
+            'constant value substitution': 'Sustitución por valor constante',
+            'LOCF': 'LOCF',
+            'NOCB': 'NOCB',
+            'mean substitution': 'Sustitución por media aritmética',
+            'median substitution': 'Sustitución por mediana',
+            'random value imputation': 'Sustitución por valor aleatorio',
+            'linear regression': 'Imputación por regresión lineal',
+            'stochastic regression': 'Imputación por regresión estocástica',
+            'imputation using k-NN': 'Imputación usando k-NN',
+            'interpolation': 'Interpolación',
+            'interpolation with seasonal adjustment': 'Interpolación con '
+                                                      'ajuste estacional',
+            'logistic regression imputation': 'Imputación por regresión '
+                                              'logística'
         }
         self.languages = {
             'ES': self.msgs_ES
@@ -117,7 +133,6 @@ class ImputeApp:
         self.load_test_data()
         # Mainloop:
         self.root.mainloop()
-
 
     # Initial view ------------------------------------------------------------
 
@@ -352,10 +367,10 @@ class ImputeApp:
         self.indata_selection_frame_fileloc_entry.xview_moveto(1)
         if self.hide_data_and_imputation():
             self.show_data_and_imputation()
-            # Reload input to draw preview, characteristics:
-            self.load_and_update_input(self.input_fileloc)
             # Reload imputation methods:
             self.initialize_inputation_methods()
+            # Reload input to draw preview, characteristics:
+            self.load_and_update_input(self.input_fileloc)
         if self.hide_output():
             self.show_output()
             # Update outdata_characteristics_str:
@@ -369,7 +384,7 @@ class ImputeApp:
         # Retain methods that are both available and applicable
         self.imputation_methods = [
             method for method in self.available_methods if method in
-            applicable_methods
+                applicable_methods
         ]
         # Localize methods:
         self.imputation_methods_loc = {
