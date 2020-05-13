@@ -54,18 +54,32 @@ class ImputeApp:
             'File not found.': 'Archivo no encontrado.',
             'File could not be read.': 'No se puede interpretar.',
             'Index': 'Índice',
-            'Listwise deletion': 'Análisis de casos completos',
-            'Drop variables': 'Eliminar variables',
-            'Random sample imputation': 'Imputación por muestra aleatoria'
+            'listwise deletion': 'Análisis de casos completos',
+            'variable deletion': 'Eliminar variables',
+            'random sample imputation': 'Imputación por muestra aleatoria'
         }
         self.languages = {
             'ES': self.msgs_ES
         }
         # Configure imputation methods:
-        self.imputation_methods = [
-            'Listwise deletion',
-            'Drop variables',
-            'Random sample imputation'
+        self.imputation_methods = []
+        self.available_methods = [
+            'listwise deletion',
+            'variable deletion',
+            'random sample imputation',
+            'most-frequent substitution',
+            'constant value substitution',
+            'LOCF',
+            'NOCB',
+            'mean substitution',
+            'median substitution',
+            'random value imputation',
+            'linear regression',
+            'stochastic regression',
+            'imputation using k-NN',
+            'interpolation',
+            'interpolation with seasonal adjustment',
+            'logistic regression imputation'
         ]
         # Create and configure window:
         self.root = tk.Tk()
@@ -76,13 +90,13 @@ class ImputeApp:
         # Initialize class attributes:
         self.imputation_methods_loc = None
         self.imputation_method_loc = None
-        self.initialize_inputation_methods()
         self.data_characteristics_str = tk.StringVar(self.root)
         self.data_characteristics_str.set('')
         self.outdata_characteristics_str = tk.StringVar(self.root)
         self.outdata_characteristics_str.set('')
         self.data = None
         self.input_fileloc = ''
+        self.applicable_methods = []
         # Initialize widgets:
         self.indata_selection_frame = None
         self.indata_selection_frame_fileloc_entry = None
@@ -99,8 +113,11 @@ class ImputeApp:
         self.outdata_characteristics_frame = None
         # Make widgets:
         self.show_initial_view()
+        # Load test data
+        self.load_test_data()
         # Mainloop:
         self.root.mainloop()
+
 
     # Initial view ------------------------------------------------------------
 
@@ -328,8 +345,6 @@ class ImputeApp:
     def change_language(self, languagecode):
         # Change language:
         self.language = languagecode
-        # Reload imputation methods:
-        self.initialize_inputation_methods()
         # Redraw interface:
         self.hide_initial_view()
         self.show_initial_view()
@@ -339,6 +354,8 @@ class ImputeApp:
             self.show_data_and_imputation()
             # Reload input to draw preview, characteristics:
             self.load_and_update_input(self.input_fileloc)
+            # Reload imputation methods:
+            self.initialize_inputation_methods()
         if self.hide_output():
             self.show_output()
             # Update outdata_characteristics_str:
@@ -347,6 +364,14 @@ class ImputeApp:
         self.make_menu()
 
     def initialize_inputation_methods(self):
+        # Get applicable methods:
+        applicable_methods = ina.get_applicable_methods(self.data)
+        # Retain methods that are both available and applicable
+        self.imputation_methods = [
+            method for method in self.available_methods if method in
+            applicable_methods
+        ]
+        # Localize methods:
         self.imputation_methods_loc = {
             self.msg(v): v for v in self.imputation_methods}
         self.imputation_method_loc = tk.StringVar(self.root)
@@ -394,6 +419,8 @@ class ImputeApp:
             self.input_error_label.grid(
                 row=3, column=1, sticky='W')
             return
+        # Initialize imputation methods
+        self.initialize_inputation_methods()
         # Show data and imputation:
         self.show_data_and_imputation()
         # Update data_characteristics_str:
@@ -426,13 +453,53 @@ class ImputeApp:
                         row=row_idx + 1, column=col_idx + 1)
 
     def apply_imputation(self):
-        if self.imputation_method_loc.get() == self.msg('Listwise deletion'):
+        if self.imputation_method_loc.get() == self.msg('listwise deletion'):
             self.outdata = ina.delete_listwise(self.data)
-        if self.imputation_method_loc.get() == self.msg('Drop variables'):
+        elif self.imputation_method_loc.get() == self.msg('variable deletion'):
             self.outdata = ina.delete_columns(self.data)
-        if self.imputation_method_loc.get() == self.msg(
-                'Random sample imputation'):
+        elif self.imputation_method_loc.get() == self.msg(
+                'random sample imputation'):
             self.outdata = ina.random_sample_imputation(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'most-frequent substitution'):
+            self.outdata = ina.most_frequent(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'constant value substitution'):
+            self.outdata = ina.constant_value_imputation(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'LOCF'):
+            self.outdata = ina.locf(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'NOCB'):
+            self.outdata = ina.nocb(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'mean substitution'):
+            self.outdata = ina.mean_substitution(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'median substitution'):
+            self.outdata = ina.mean_substitution(
+                self.data, method='median')
+        elif self.imputation_method_loc.get() == self.msg(
+                'random value imputation'):
+            self.outdata = ina.random_value_imputation(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'linear regression'):
+            self.outdata = ina.linear_regression(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'stochastic regreeion'):
+            self.outdata = ina.linear_regression(self.data, noise=True)
+        elif self.imputation_method_loc.get() == self.msg(
+                'imputation using k-NN'):
+            self.outdata = ina.knn(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'interpolation'):
+            self.outdata = ina.interpolation(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'interpolation with seasonal adjustment'):
+            self.outdata = ina.seasonal_interpolation(self.data)
+        elif self.imputation_method_loc.get() == self.msg(
+                'logistic regression imputation'):
+            self.outdata = ina.logistic_regression(self.data)
         # Add log:
         if self.imputation_log is not None:
             self.imputation_log.grid_remove()
@@ -477,6 +544,16 @@ class ImputeApp:
         else:
             f.write(self.outdata.to_csv(index=False))
             f.close()
+
+    def load_test_data(self):
+        filename = '/Users/miguelmacarro/Downloads/0-sales.csv'
+        # Update fileloc_entry:
+        self.indata_selection_frame_fileloc_entry.delete(0, tk.END)
+        self.indata_selection_frame_fileloc_entry.insert(0, filename)
+        self.indata_selection_frame_fileloc_entry.xview_moveto(1)
+        self.input_fileloc = filename
+        # Load table and update info:
+        self.load_and_update_input(filename)
 
 
 if __name__ == '__main__':
