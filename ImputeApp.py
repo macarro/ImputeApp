@@ -451,6 +451,8 @@ class ImputeApp:
                         borderwidth=1
                     ).grid(
                         row=row_idx + 1, column=col_idx + 1)
+        # Hide output preview:
+        self.hide_output()
 
     def apply_imputation(self):
         if self.imputation_method_loc.get() == self.msg('listwise deletion'):
