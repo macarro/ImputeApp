@@ -100,8 +100,8 @@ class ImputeApp:
         # Create and configure window:
         self.root = tk.Tk()
         self.root.title('ImputeApp')
-        self.root.geometry('450x620')
-        self.root.minsize(450, 620)
+        self.root.geometry('450x650')
+        self.root.minsize(450, 650)
         self.make_menu()
         # Initialize class attributes:
         self.imputation_methods_loc = None
