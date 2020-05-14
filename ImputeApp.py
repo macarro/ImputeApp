@@ -129,8 +129,6 @@ class ImputeApp:
         self.outdata_characteristics_frame = None
         # Make widgets:
         self.show_initial_view()
-        # Load test data
-        self.load_test_data()
         # Mainloop:
         self.root.mainloop()
 
@@ -561,16 +559,6 @@ class ImputeApp:
         else:
             f.write(self.outdata.to_csv(index=False))
             f.close()
-
-    def load_test_data(self):
-        filename = '/Users/miguelmacarro/Downloads/0-sales.csv'
-        # Update fileloc_entry:
-        self.indata_selection_frame_fileloc_entry.delete(0, tk.END)
-        self.indata_selection_frame_fileloc_entry.insert(0, filename)
-        self.indata_selection_frame_fileloc_entry.xview_moveto(1)
-        self.input_fileloc = filename
-        # Load table and update info:
-        self.load_and_update_input(filename)
 
 
 if __name__ == '__main__':
