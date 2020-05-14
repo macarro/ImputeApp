@@ -1,7 +1,7 @@
 # ImputeApp
 Desktop app for treating missing values in datasets
 
-## Building for macOS
+## Building for macOS (on macOS)
 
 Prepare a virtual environment and use pip to install imputena and pyinstaller:
 
@@ -14,7 +14,7 @@ This is only necessary once. Inside the virtual environemnt, run the following
 command to build the application for macOS at the project root directory:
 
 ```ShellSession
-pyinstaller --onefile --add-binary='/System/Library/Frameworks/Tk.framework/Tk':'tk' --add-binary='/System/Library/Frameworks/Tcl.framework/Tcl':'tcl' --windowed --noconfirm ImputeApp.spec
+pyinstaller --onefile --add-binary='/System/Library/Frameworks/Tk.framework/Tk':'tk' --add-binary='/System/Library/Frameworks/Tcl.framework/Tcl':'tcl' --windowed --noconfirm ImputeApp-macOS.spec
 ```
 
 Explanation:
