@@ -1,7 +1,12 @@
-# ImputeApp
-Desktop app for treating missing values in datasets
+# <img alt="Logo" src="https://raw.githubusercontent.com/macarro/ImputeApp/master/resources/ImputeApp.png" height="60"> ImputeApp
+Desktop app for treating missing values in datasets.
 
-## Builidng for Linux (on Linux)
+<img alt="Screenshot" src="https://raw.githubusercontent.com/macarro/ImputeApp/master/resources/screenshot.png" height="300">
+
+* The application has been tested to work with Window 10, macOS 10.12 Sierra and Linux Mint 19.3.
+* The interface is available in English and Spanish.
+
+## Building for Linux (on Linux)
 
 Prepare a virtual environment and use pip to install imputena and pyinstaller:
 
@@ -22,7 +27,7 @@ Explanation:
 * onefile indicates that we want a single executable file
 * pyinstaller is called on the .spec instead of the .py because the .spec
  includes information about hidden imports
- 
+
 The executable file will be located in the dist directory.
 
 
@@ -52,5 +57,5 @@ Explanation:
  confirmation
 * pyinstaller is called on the .spec instead of the .py because the .spec
  includes information about hidden imports
- 
+
  The executable file will be located in the dist directory.
